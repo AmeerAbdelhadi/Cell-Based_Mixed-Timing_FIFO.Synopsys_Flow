@@ -1,0 +1,175 @@
+####################################################################################
+## Copyright (c) 2016, University of British Columbia (UBC)  All rights reserved. ##
+##                                                                                ##
+## Redistribution  and  use  in  source   and  binary  forms,   with  or  without ##
+## modification,  are permitted  provided that  the following conditions are met: ##
+##   * Redistributions   of  source   code  must  retain   the   above  copyright ##
+##     notice,  this   list   of   conditions   and   the  following  disclaimer. ##
+##   * Redistributions  in  binary  form  must  reproduce  the  above   copyright ##
+##     notice, this  list  of  conditions  and the  following  disclaimer in  the ##
+##     documentation and/or  other  materials  provided  with  the  distribution. ##
+##   * Neither the name of the University of British Columbia (UBC) nor the names ##
+##     of   its   contributors  may  be  used  to  endorse  or   promote products ##
+##     derived from  this  software without  specific  prior  written permission. ##
+##                                                                                ##
+## THIS  SOFTWARE IS  PROVIDED  BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" ##
+## AND  ANY EXPRESS  OR IMPLIED WARRANTIES,  INCLUDING,  BUT NOT LIMITED TO,  THE ##
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE ##
+## DISCLAIMED.  IN NO  EVENT SHALL University of British Columbia (UBC) BE LIABLE ##
+## FOR ANY DIRECT,  INDIRECT,  INCIDENTAL,  SPECIAL,  EXEMPLARY, OR CONSEQUENTIAL ##
+## DAMAGES  (INCLUDING,  BUT NOT LIMITED TO,  PROCUREMENT OF  SUBSTITUTE GOODS OR ##
+## SERVICES;  LOSS OF USE,  DATA,  OR PROFITS;  OR BUSINESS INTERRUPTION) HOWEVER ##
+## CAUSED AND ON ANY THEORY OF LIABILITY,  WHETHER IN CONTRACT, STRICT LIABILITY, ##
+## OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE ##
+## OF  THIS SOFTWARE,  EVEN  IF  ADVISED  OF  THE  POSSIBILITY  OF  SUCH  DAMAGE. ##
+####################################################################################
+
+####################################################################################
+##                 Mixed asp*/clocked cell-based FIFOs - README                   ##
+##   Author: Ameer M.S. Abdelhadi (ameer.abdelhadi@gmail.com; ameer@ece.ubc.ca)   ##
+##  Cell-based Mixed FIFOs :: University of British Columbia  (UBC) :: July 2016  ##
+####################################################################################
+
+* This package includes a complete design framework for mixed asp* asynchronous and 
+  clocked synchronous cell-based FIFOs.
+  - For full design description, please refer to the following paper: ????
+* A complete RTL2GDS flow is supported, including logic synthesis, place and route,
+  static timing analysis, power estimates and gate-level simulation with
+  state-of-the-art commercial tools and design library. 
+* Modify env.cts for your design, CAD and environment variables
+* The flow allows multiple designs using a single command-line. The following
+  parameters can be configured directly in the command line: sender/receiver
+  protocols, FIFO stages, data widths, and freq's. Choosing several values for each
+  parameter will generate several design configurations.
+  - Please refer to design flow script: ./scr/do for more information.
+
+####################################################################################
+##                         Directories and files structure                        ##
+####################################################################################
+
+<design> = "{sender type}2{receiver type}_{FIFO stages}s.{data width}b_{freq}MHz"
+
+- $RUNDIR: Design home directory
+  - README : This file
+  - env.cts: Defines design & environment variables; Setups ASIC synthesis CAD tools
+  - res.rep: Final results report
+  - do.log : 'do' script log file
+  - $SCRDIR (scr/): Scripts directory
+    - do       : RTL 2 GDS ASIC Synthesis Design Flow Manager
+    - dve.tcl  : DVE Configuration to Show  VCD Waveform
+    - enc.cfg  : Cadence SoC Encounter configuration file
+    - pnr.entcl: Place and route with Cadence SoC Encounter
+    - pwr.pptcl: Power estimates with Synopsys Prime Time
+    - res.pl   : Final report generator
+    - sta.pttcl: Static timing analysis with Synopsys Prime Time
+    - stt.pl   : Generates netlist statistic data
+    - syn.dctcl: Logic synthesis with Synopsys Design Compiler
+  - $RTLDIR (rtl/): RTL directory
+    - asps2asps_fifo_tb.v        : asp* -> asp* fifo gate-level-simulation testbench module
+    - asps2clkd_fifo_tb.v        : asp* -> clkd fifo gate-level-simulation testbench module
+    - clkd2asps_fifo_tb.v        : clkd -> asp* fifo gate-level-simulation testbench module
+    - clkd2clkd_fifo_tb.v        : clkd -> clkd fifo gate-level-simulation testbench module
+    - asps2asps_fifo.v           : asp* -> asp* fifo top-level module
+    - asps2clkd_fifo.v           : asp* -> clkd fifo top-level module
+    - clkd2asps_fifo.v           : clkd -> asp* fifo top-level module
+    - clkd2clkd_fifo.v           : clkd -> clkd fifo top-level module
+    - asps2asps_stage.v          : asp* -> asp* fifo stage module
+    - asps2clkd_stage.v          : asp* -> clkd fifo stage module
+    - clkd2asps_stage.v          : clkd -> asp* fifo stage module
+    - clkd2clkd_stage.v          : clkd -> clkd fifo stage module
+    - asps2asps_full_empty_ctrl.v: asp* -> asp* stage full/empty controller module
+    - asps2clkd_full_empty_ctrl.v: asp* -> clkd stage full/empty controller module
+    - clkd2asps_full_empty_ctrl.v: clkd -> asp* stage full/empty controller module
+    - clkd2clkd_full_empty_ctrl.v: clkd -> clkd stage full/empty controller module
+    - asps_get.v                 : asp* get interface and token propagation module
+    - asps_put.v                 : asp* put interface and token propagation module
+    - clkd_get.v                 : Clocked interface and get token propagation module
+    - clkd_put.v                 : Clocked put interface and token propagation module
+    - config.h                   : Generated by scr/do; contains design configuraion
+  - $REPDIR (rep/): Design reports directory
+    - <design>.check_design.precompile.syn.rep         : Synopsys design-compiler logic synthesis: Check pre-compile design
+    - <design>.check_design.postcompile.syn.rep        : Synopsys design-compiler logic synthesis: Check post-compile design
+    - <design>.report_clocks.syn.rep                   : Synopsys design-compiler logic synthesis: Report design clocks
+    - <design>.report_constraint.syn.rep               : Synopsys design-compiler logic synthesis: Report design constrains
+    - <design>.report_port.syn.rep                     : Synopsys design-compiler logic synthesis: Report design ports
+    - <design>.report_area.syn.rep                     : Synopsys design-compiler logic synthesis: Report design area
+    - <design>.report_cell.syn.rep                     : Synopsys design-compiler logic synthesis: Report design used cells and area
+    - <design>.report_design.syn.rep                   : Synopsys design-compiler logic synthesis: Report design (general)
+    - <design>.report_power.syn.rep                    : Synopsys design-compiler logic synthesis: Report design power
+    - <design>.report_ref.syn.rep                      : Synopsys design-compiler logic synthesis: Report design cell reference statistics
+    - <design>.report_resources.syn.rep                : Synopsys design-compiler logic synthesis: Report design resources sharing
+    - <design>.report_timing.syn.rep                   : Synopsys design-compiler logic synthesis: Report design timing
+    - <design>.verifygeometry.floorplan.pnr.rep        : Cadence SoC Encounter place and route  : Verify post-floorplan geometry
+    - <design>.verifygeometry.route.pnr.rep            : Cadence SoC Encounter place and route  : Verify post-route geometry
+    - <design>.verifygeometry.final.pnr.rep            : Cadence SoC Encounter place and route  : Verify final geometry
+    - <design>.checkplace.pnr.rep                      : Cadence SoC Encounter place and route  : Check placement
+    - <design>.syncStatistics.pnr.rep                  : Cadence SoC Encounter place and route  : Report brute-force syncronizers statistics
+    - <design>.verifyconnectivity.all.final.pnr.rep    : Cadence SoC Encounter place and route  : Verify all wires connectivity
+    - <design>.verifyconnectivity.regular.final.pnr.rep: Cadence SoC Encounter place and route  : Verify regular wires connectivity
+    - <design>.verifyconnectivity.route.pnr.rep        : Cadence SoC Encounter place and route  : Verify post-route connectivity
+    - <design>.verifyConnectivity.special.final.pnr.rep: Cadence SoC Encounter place and route  : Verify special wires connectivity
+    - <design>.verifymetaldensity.final.pnr.rep        : Cadence SoC Encounter place and route  : Verify metal density
+    - <design>.verifyprocessantenna.route.pnr.rep      : Cadence SoC Encounter place and route  : Verify process antenna
+    - <design>.reportpower.route.pnr.rep               : Cadence SoC Encounter place and route  : Report post-routing power
+    - <design>.cellStatistics.pnr.rep                  : Cell statistics report
+    - <design>.syncStatistics.pnr.rep                  : Synchronizer cell statistics report
+    - <design>.runtime.rep                             : Report complete design runtime
+    - do.history                                       : History of 'do' commands
+  - $LOGDIR (log/): Run logs directory
+    - <design>.syn.log    : Synopsys design-compile logic synthesis run log
+    - <design>.pnr.log    : Cadence SoC Encounter place & route run log
+    - <design>.sta.log    : Synopsys PrimeTime static timing analysis run log
+    - <design>.emp.sim.log: NC-Verilog gate-level-simulation (almost empty occupancy fifo test) run log
+    - <design>.mid.sim.log: NC-Verilog gate-level-simulation (almost middle occupancy fifo test) run log
+    - <design>.fll.sim.log: NC-Verilog gate-level-simulation (almost full occupancy fifo test) run log
+    - <design>.fst.sim.log: NC-Verilog gate-level-simulation (fast mode fifo test) run log
+    - <design>.rnd.sim.log: NC-Verilog gate-level-simulation (random mode fifo test) run log
+    - <design>.pwr.log    : Synopsys PrimeTime power estimates run log
+  - $SIMDIR (sim/): Logic simulation related files
+    - <design>.EMP.vcd: VCD (value change dump) for back-annotated gate-level-simulation (almost empty occupancy fifo test)
+    - <design>.MID.vcd: VCD (value change dump) for back-annotated gate-level-simulation (almost middle occupancy fifo test)
+    - <design>.FLL.vcd: VCD (value change dump) for back-annotated gate-level-simulation (almost full occupancy fifo test)
+    - <design>.FST.vcd: VCD (value change dump) for back-annotated gate-level-simulation (fast mode fifo test)
+    - <design>.RND.vcd: VCD (value change dump) for back-annotated gate-level-simulation (random mode fifo test)
+  - $STADIR (sta/): Static Timing Analysis (STA) related files
+    - <design>.sdf                   : SDF (Standard delay format) for back-annotation.
+    - <design>.pnr.sdf               : SDF (Standard delay format) for back-annotation (generated by Cadence SoC Encounter place and route)
+    - <design>.sdc                   : SDC (Synopsys design constraints) file, for timing consgtraints
+    - <design>.references.rep        : Design cell reference statistics (post-layout netlist)
+    - <design>.timing.all.rep        : A timing report generated by Synopsys PrimeTime for all timing paths
+    - <design>.timing.clk_get.rep    : A timing report generated by Synopsys PrimeTime for paths start in clk_get clock domain
+    - <design>.timing.clk_put.rep    : A timing report generated by Synopsys PrimeTime for paths start in clk_put clock domain
+    - <design>.timing.datain.rep     : A timing report generated by Synopsys PrimeTime for paths start from datain
+    - <design>.timing.dataout.rep    : A timing report generated by Synopsys PrimeTime for paths end with dataout
+    - <design>.timing.datav.rep      : A timing report generated by Synopsys PrimeTime for paths end with datav
+    - <design>.timing.req_get.rep    : A timing report generated by Synopsys PrimeTime for paths start with req_get
+    - <design>.timing.req_put.rep    : A timing report generated by Synopsys PrimeTime for paths start with req_put
+    - <design>.timing.spaceav.rep    : A timing report generated by Synopsys PrimeTime for paths end with sapceac
+    - <design>.timing.place.pnr.rep  : A timing report generated by Cadence SoC Encounter for post-place design
+    - <design>.timing.postcts.pnr.rep: A timing report generated by Cadence SoC Encounter for post-cts design
+    - <design>.timing.final.pnr.rep  : A timing report generated by Cadence SoC Encounter for final design
+  - $RCEDIR (rce/): RC extraction related files directory
+    - <design>.dspf: DSPF RC extraction formation gnerated by Cadence SoC Encounter
+    - <design>.spef: SPEF RC extraction formation gnerated by Cadence SoC Encounter
+  - $CTSDIR (cts/): Clock Tree Synthesis (CTS) related files
+    - <design>.enc.cts                      : Cadence SoC Encounter: Clock synthesis technology file format
+    - <design>.report.post_troute.ctsrpt    : Cadence SoC Encounter: Complete clock tree transition time report
+    - <design>.skew.post_troute_local.ctsrpt: Cadence SoC Encounter: Complete clock tree skew time report
+  - $ENCDIR (enc/): SoC Encounter related files
+    - <design>.8b_200MHz.def          : Cadence SoC Encounter: Layout .def file
+    - <design>.8b_200MHz.lef          : Cadence SoC Encounter: Layout .lef file
+    - <design>.8b_200MHz.tlf          : Cadence SoC Encounter: Timing extraction .tlf file
+    - <design>.8b_200MHz.fp           : Cadence SoC Encounter: Floorplan desription
+    - <design>.8b_200MHz.fp.spr       : Cadence SoC Encounter: Floorplan desription
+    - <design>.8b_200MHz.floorplan.enc: Cadence SoC Encounter: post-floorplan restore point
+    - <design>.8b_200MHz.place.enc    : Cadence SoC Encounter: post-place restore point
+    - <design>.8b_200MHz.cts.enc      : Cadence SoC Encounter: post-cts restore point
+    - <design>.8b_200MHz.postroute.enc: Cadence SoC Encounter: post-route restore point
+  - $NETDIR (net/): Netlists directory
+    - <design>.syn.vh: Design netlist produced by Synopsys design-compile logic synthesis
+    - <design>.pnr.vh: Design netlist produced by Cadence SoC Encounter place & route
+    - <design>.sim.vh: Design netlist for gate-level-simulation (GDS)
+  - $PWRDIR (pwr/): Power estimates directory
+    - <design>.pwr.rep: A power estimates report generated by Synopsys PrimeTime
+  - $GDSDIR (gds/): Generated GDS directory
+  - $ECODIR (eco/): ECO (design changes in p&r) related files
